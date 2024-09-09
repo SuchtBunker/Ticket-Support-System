@@ -276,7 +276,9 @@ net.Receive("Support:Rate",function(_,user)
 	if user["Support_Rate"] != admin then return end
 	user["Support_Rate"] = nil
 	
-	Logs.Query("INSERT INTO rp_supports (admin, user, stars, description) VALUES ("..admin..","..user:SteamID64()..","..math.Clamp(net.ReadUInt(3),1,5)..",'"..Logs.Escape(net.ReadString()).."');")
+	if SBLogsInstalled then
+		Logs.Query("INSERT INTO rp_supports (admin, user, stars, description) VALUES ("..admin..","..user:SteamID64()..","..math.Clamp(net.ReadUInt(3),1,5)..",'"..Logs.Escape(net.ReadString()).."');")
+	end
 end)
 
 // Admin Stuff
