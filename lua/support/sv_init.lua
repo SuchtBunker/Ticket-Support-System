@@ -3,11 +3,9 @@
 module("Support",package.seeall)
 
 /* TICKET COUNTING */
-_benlib.AddDB(Support,"root","gmod_darkrp",nil,nil)
-Support.Query("CREATE TABLE IF NOT EXISTS rp_supports (steam VARCHAR(17), spectator BOOL DEFAULT FALSE, unix TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP);")
-if SBLogsInstalled then
-	Logs.Query("CREATE TABLE IF NOT EXISTS rp_supports (admin VARCHAR(17), user VARCHAR(17), stars INT, description TEXT, unix TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP);")
-end
+_benlib.AddDB(Support, "base")
+Support.Query("CREATE TABLE IF NOT EXISTS supports (steam CHAR(17), spectator BOOL DEFAULT FALSE, `time` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP);")
+Support.Query("CREATE TABLE IF NOT EXISTS support_ratings (admin CHAR(17), user CHAR(17), stars INT, description TEXT, `time` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP);")
 
 function IsAdmin(ply)
 	return AdminUserGroups[ply:GetUserGroup()] == true
@@ -17,11 +15,11 @@ hook.Add("Support:FinishedTicket","TicketCounter",function(ticket)
 	local ply = ticket["Admin"]
 	if !IsValid(ply) then return end
 
-	Support.Query("INSERT INTO rp_supports (steam, spectator) VALUES ('"..ply:SteamID64().."',false);")
+	Support.Query("INSERT INTO supports (steam, spectator) VALUES ('"..ply:SteamID64().."',false);")
 
 	local spec = ply["Support_Spectator"]
 	if IsValid(spec) then
-		Support.Query("INSERT INTO rp_supports (steam, spectator) VALUES ('"..spec:SteamID64().."',true);")
+		Support.Query("INSERT INTO supports (steam, spectator) VALUES ('"..spec:SteamID64().."',true);")
 	end
 end)
 
@@ -276,9 +274,7 @@ net.Receive("Support:Rate",function(_,user)
 	if user["Support_Rate"] != admin then return end
 	user["Support_Rate"] = nil
 	
-	if SBLogsInstalled then
-		Logs.Query("INSERT INTO rp_supports (admin, user, stars, description) VALUES ("..admin..","..user:SteamID64()..","..math.Clamp(net.ReadUInt(3),1,5)..",'"..Logs.Escape(net.ReadString()).."');")
-	end
+	Support.Query("INSERT INTO support_ratings (admin, user, stars, description) VALUES ("..admin..","..user:SteamID64()..","..math.Clamp(net.ReadUInt(3),1,5)..",'"..Support.Escape(net.ReadString()).."');")
 end)
 
 // Admin Stuff
@@ -300,12 +296,12 @@ net.Receive("Support:Admin",function(_,ply)
 			})
 		end
 
-		ply:AddMoney(TicketReward)
+		ply:addMoney(TicketReward)
 		NotifyLang(ply,"TICKET_REWARD")
 
 		local spec = ply["Support_Spectator"]
 		if IsValid(spec) then
-			spec:AddMoney(SpecTicketReward)
+			spec:addMoney(SpecTicketReward)
 			NotifyLang(spec,"TICKET_REWARD_SPEC")
 		end 
 

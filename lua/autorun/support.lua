@@ -45,7 +45,7 @@ AdminUserGroups = {
 StuckPopupOnlySendToJobs = true
 AdminJobs = AdminJobs or {}
 hook.Add("PostGamemodeLoaded", "Support:StuckJobs", function()
-	AdminJobs = {
+	AdminJobs = { // These Jobs get notified when a player uses the !stuck command
 		//[TEAM_ADMIN] = true,
 	}
 end)
