@@ -39,7 +39,6 @@ NotRefundableAmmo = {
 
 AdminUserGroups = {
 	["superadmin"] = true,
-	["user"] = true,
 }
 
 StuckPopupOnlySendToJobs = true
